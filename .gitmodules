@@ -1,0 +1,3 @@
+[submodule "modules/log.c"]
+	path = modules/log.c
+	url = https://github.com/BDeliers/log.c
