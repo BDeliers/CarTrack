@@ -434,11 +434,11 @@
                      </config_set>
                   </instance>
                   <instance name="SysTick" uuid="19ee5d26-10b4-4f31-a12c-681de861377b" type="systick" type_id="systick_835fd8dd4fe722f5394f39cf587e71ab" mode="GENERAL" peripheral="SysTick" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
-                     <config_set name="fsl_systick" quick_selection="QS_SYSTICK_1">
+                     <config_set name="fsl_systick">
                         <struct name="timingConfig">
                            <setting name="clockSource" value="ProcessorClock"/>
                            <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
-                           <setting name="reload" value="10 ms"/>
+                           <setting name="reload" value="1 ms"/>
                         </struct>
                         <struct name="interrupt">
                            <setting name="IRQn" value="SysTick_IRQn"/>

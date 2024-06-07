@@ -16,6 +16,7 @@
 #include "MCXA153.h"
 /* TODO: insert other include files here. */
 #include "app/AppMain.hpp"
+#include "app/AppCore.hpp"
 
 /* TODO: insert other definitions and declarations here. */
 
@@ -23,6 +24,8 @@
  * @brief   Application entry point.
  */
 int main(void) {
+
+    AppCore_InitInterruptVector();
 
     /* Init board hardware. */
     BOARD_InitBootPins();
@@ -32,13 +35,4 @@ int main(void) {
     AppMain::GetInstance().MainLoop();
 
     return 0 ;
-}
-
-extern "C"
-{
-
-void SysTick_Handler(void)
-{
-}
-
 }

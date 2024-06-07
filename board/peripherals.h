@@ -37,7 +37,7 @@ extern "C" {
 /* Definition of clock source frequency. */
 #define SYSTICK_CLK_FREQ 96000000UL
 /* Definition of clock source frequency. */
-#define SYSTICK_TICKS 960000UL
+#define SYSTICK_TICKS 96000UL
 /* SysTick interrupt vector ID (number). */
 #define SYSTICK_TIMER_REFERENCE_IRQN SysTick_IRQn
 /* SysTick interrupt handler identifier. */

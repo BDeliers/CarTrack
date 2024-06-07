@@ -25,7 +25,7 @@
 ///        2 for local time string
 ///        1 for epoch
 ///        0 for none
-#define LOGC__TIME_FORMAT       0
+#define LOGC__TIME_FORMAT       1
 
 /// @brief Hide file path and line number for standard output
 //#define LOGC__STDOUT_NO_FILEINFO

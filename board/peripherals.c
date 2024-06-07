@@ -201,11 +201,10 @@ instance:
     - timingConfig:
       - clockSource: 'ProcessorClock'
       - clockSourceFreq: 'ClocksTool_DefaultInit'
-      - reload: '10 ms'
+      - reload: '1 ms'
     - interrupt:
       - IRQn: 'SysTick_IRQn'
       - enable_custom_name: 'false'
-    - quick_selection: 'QS_SYSTICK_1'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 
