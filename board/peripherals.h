@@ -9,11 +9,14 @@
 /***********************************************************************************************************************
  * Included files
  **********************************************************************************************************************/
+#include "fsl_edma.h"
+#include "stdlib.h"
 #include "fsl_common.h"
 #include "fsl_lpuart.h"
 #include "fsl_clock.h"
 #include "fsl_gpio.h"
 #include "fsl_port.h"
+#include "fsl_lpuart_edma.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -23,6 +26,8 @@ extern "C" {
  * Definitions
  **********************************************************************************************************************/
 /* Definitions for BOARD_InitPeripherals functional group */
+/* Used DMA device. */
+#define DMA0_DMA_BASEADDR (EDMA_Type *)DMA0
 /* Definition of peripheral ID */
 #define LPUART0_PERIPHERAL LPUART0
 /* Definition of the clock source frequency */
@@ -42,11 +47,32 @@ extern "C" {
 #define SYSTICK_TIMER_REFERENCE_IRQN SysTick_IRQn
 /* SysTick interrupt handler identifier. */
 #define SYSTICK_TIMER_REFERENCE_IRQHANDLER SysTick_Handler
+/* Definition of peripheral ID */
+#define LPUART2_PERIPHERAL LPUART2
+/* Definition of the clock source frequency */
+#define LPUART2_CLOCK_SOURCE 8000000UL
+/* LPUART2 eDMA source request. */
+#define LPUART2_RX_DMA_REQUEST kDma0RequestLPUART2Rx
+/* Selected eDMA channel number. */
+#define LPUART2_RX_DMA_CHANNEL 0
+/* Used DMA device. */
+#define LPUART2_RX_DMA_BASEADDR DMA0
+/* LPUART2 eDMA source request. */
+#define LPUART2_TX_DMA_REQUEST kDma0RequestLPUART2Tx
+/* Selected eDMA channel number. */
+#define LPUART2_TX_DMA_CHANNEL 1
+/* Used DMA device. */
+#define LPUART2_TX_DMA_BASEADDR DMA0
 
 /***********************************************************************************************************************
  * Global variables
  **********************************************************************************************************************/
+extern edma_config_t DMA0_config;
 extern const lpuart_config_t LPUART0_config;
+extern const lpuart_config_t LPUART2_config;
+extern edma_handle_t LPUART2_RX_Handle;
+extern edma_handle_t LPUART2_TX_Handle;
+extern lpuart_edma_handle_t LPUART2_LPUART_eDMA_Handle;
 
 /***********************************************************************************************************************
  * Initialization functions

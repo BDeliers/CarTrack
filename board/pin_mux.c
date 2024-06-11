@@ -12,6 +12,12 @@ processor: MCXA153
 package_id: MCXA153VLH
 mcu_data: ksdk2_0
 processor_version: 15.0.0
+pin_labels:
+- {pin_num: '52', pin_signal: P0_3/TDI/LPUART0_TXD/LPSPI0_SDO/CT0_MAT1/UTICK_CAP1/CMP0_OUT/CMP1_IN1, label: DEBUG_TX}
+- {pin_num: '51', pin_signal: P0_2/TDO/SWO/LPUART0_RXD/LPSPI0_SCK/CT0_MAT0/UTICK_CAP0/I3C0_PUR, label: DEBUG_RX}
+- {pin_num: '62', pin_signal: P1_4/WUU0_IN8/FREQME_CLK_IN0/LPSPI0_PCS3/LPUART2_RXD/CT1_MAT2/ADC0_A20/CMP0_IN2, label: MODEM_RX}
+- {pin_num: '63', pin_signal: P1_5/FREQME_CLK_IN1/LPSPI0_PCS2/LPUART2_TXD/CT1_MAT3/ADC0_A21/CMP1_IN2, label: MODEM_TX}
+- {pin_num: '38', pin_signal: P3_12/LPUART2_RTS_B/CT1_MAT2/PWM0_X0, label: MODEM_RST, identifier: MODEM_RST}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -41,6 +47,8 @@ BOARD_InitPins:
   - {pin_num: '49', peripheral: SWD, signal: SWDIO, pin_signal: P0_0/TMS/SWDIO/LPUART0_RTS_B/LPSPI0_PCS0/CT_INP0}
   - {pin_num: '52', peripheral: LPUART0, signal: TX, pin_signal: P0_3/TDI/LPUART0_TXD/LPSPI0_SDO/CT0_MAT1/UTICK_CAP1/CMP0_OUT/CMP1_IN1}
   - {pin_num: '51', peripheral: LPUART0, signal: RX, pin_signal: P0_2/TDO/SWO/LPUART0_RXD/LPSPI0_SCK/CT0_MAT0/UTICK_CAP0/I3C0_PUR}
+  - {pin_num: '62', peripheral: LPUART2, signal: RX, pin_signal: P1_4/WUU0_IN8/FREQME_CLK_IN0/LPSPI0_PCS3/LPUART2_RXD/CT1_MAT2/ADC0_A20/CMP0_IN2}
+  - {pin_num: '63', peripheral: LPUART2, signal: TX, pin_signal: P1_5/FREQME_CLK_IN1/LPSPI0_PCS2/LPUART2_TXD/CT1_MAT3/ADC0_A21/CMP1_IN2, pull_select: up, pull_enable: enable}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -55,10 +63,16 @@ void BOARD_InitPins(void)
 {
     /* Write to PORT0: Peripheral clock is enabled */
     CLOCK_EnableClock(kCLOCK_GatePORT0);
+    /* Write to PORT1: Peripheral clock is enabled */
+    CLOCK_EnableClock(kCLOCK_GatePORT1);
     /* PORT0 peripheral is released from reset */
     RESET_ReleasePeripheralReset(kPORT0_RST_SHIFT_RSTn);
     /* LPUART0 peripheral is released from reset */
     RESET_ReleasePeripheralReset(kLPUART0_RST_SHIFT_RSTn);
+    /* LPUART2 peripheral is released from reset */
+    RESET_ReleasePeripheralReset(kLPUART2_RST_SHIFT_RSTn);
+    /* PORT1 peripheral is released from reset */
+    RESET_ReleasePeripheralReset(kPORT1_RST_SHIFT_RSTn);
 
     PORT0->PCR[0] = ((PORT0->PCR[0] &
                       /* Mask bits to zero which are setting */
@@ -96,6 +110,32 @@ void BOARD_InitPins(void)
     PORT0->PCR[3] = ((PORT0->PCR[3] &
                       /* Mask bits to zero which are setting */
                       (~(PORT_PCR_IBE_MASK)))
+
+                     /* Input Buffer Enable: Enables. */
+                     | PORT_PCR_IBE(PCR_IBE_ibe1));
+
+    /* PORT1_4 (pin 62) is configured as LPUART2_RXD */
+    PORT_SetPinMux(PORT1, 4U, kPORT_MuxAlt3);
+
+    PORT1->PCR[4] = ((PORT1->PCR[4] &
+                      /* Mask bits to zero which are setting */
+                      (~(PORT_PCR_IBE_MASK)))
+
+                     /* Input Buffer Enable: Enables. */
+                     | PORT_PCR_IBE(PCR_IBE_ibe1));
+
+    /* PORT1_5 (pin 63) is configured as LPUART2_TXD */
+    PORT_SetPinMux(PORT1, 5U, kPORT_MuxAlt3);
+
+    PORT1->PCR[5] = ((PORT1->PCR[5] &
+                      /* Mask bits to zero which are setting */
+                      (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_IBE_MASK)))
+
+                     /* Pull Select: Enables internal pullup resistor. */
+                     | PORT_PCR_PS(PCR_PS_ps1)
+
+                     /* Pull Enable: Enables. */
+                     | PORT_PCR_PE(PCR_PE_pe1)
 
                      /* Input Buffer Enable: Enables. */
                      | PORT_PCR_IBE(PCR_IBE_ibe1));

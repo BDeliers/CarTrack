@@ -54,6 +54,46 @@ component:
  * BOARD_InitPeripherals functional group
  **********************************************************************************************************************/
 /***********************************************************************************************************************
+ * DMA0 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'DMA0'
+- type: 'edma4'
+- mode: 'general'
+- custom_name_enabled: 'false'
+- type_id: 'edma4_95e3aea287c3ff100216738111d7d17d'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'DMA0'
+- config_sets:
+  - fsl_edma:
+    - common_settings:
+      - vars: []
+      - enableHaltOnError: 'true'
+      - enableDebugMode: 'false'
+      - enableRoundRobinArbitration: 'fixedPriority'
+      - enableGlobalChannelLink: 'true'
+      - enableMasterIdReplication: 'false'
+    - dma_table:
+      - 0: []
+      - 1: []
+    - edma_channels: []
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+edma_config_t DMA0_config = {
+  .enableMasterIdReplication = false,
+  .enableGlobalChannelLink = true,
+  .enableHaltOnError = true,
+  .enableDebugMode = false,
+  .enableRoundRobinArbitration = false
+};
+
+/* Empty initialization function (commented out)
+static void DMA0_init(void) {
+} */
+
+/***********************************************************************************************************************
  * NVIC initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -214,14 +254,127 @@ static void SysTick_init(void) {
 }
 
 /***********************************************************************************************************************
+ * LPUART2 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'LPUART2'
+- type: 'lpuart'
+- mode: 'edma'
+- custom_name_enabled: 'false'
+- type_id: 'lpuart_65a7af1f2e04f737cb1c75e9f68585ac'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'LPUART2'
+- config_sets:
+  - lpuartConfig_t:
+    - lpuartConfig:
+      - clockSource: 'LpuartClock'
+      - lpuartSrcClkFreq: 'ClocksTool_DefaultInit'
+      - baudRate_Bps: '115200'
+      - parityMode: 'kLPUART_ParityDisabled'
+      - dataBitsCount: 'kLPUART_EightDataBits'
+      - isMsb: 'false'
+      - stopBitCount: 'kLPUART_OneStopBit'
+      - enableMatchAddress1: 'false'
+      - matchAddress1: '0'
+      - enableMatchAddress2: 'false'
+      - matchAddress2: '0'
+      - txFifoWatermark: '0'
+      - rxFifoWatermark: '1'
+      - enableRxRTS: 'false'
+      - enableTxCTS: 'false'
+      - txCtsSource: 'kLPUART_CtsSourcePin'
+      - txCtsConfig: 'kLPUART_CtsSampleAtStart'
+      - rxIdleType: 'kLPUART_IdleTypeStartBit'
+      - rxIdleConfig: 'kLPUART_IdleCharacter1'
+      - enableTx: 'true'
+      - enableRx: 'true'
+    - quick_selection: 'QuickSelection1'
+  - edmaCfg:
+    - edma_channels:
+      - enable_rx_edma_channel: 'true'
+      - edma_rx_channel:
+        - uid: '1717764231481'
+        - eDMAn: '0'
+        - eDMA_source: 'kDma0RequestLPUART2Rx'
+        - init_channel_priority: 'false'
+        - edma_channel_Preemption:
+          - enableChannelPreemption: 'false'
+          - enablePreemptAbility: 'false'
+          - channelPriority: '0'
+        - masterIdReplicationEnable: 'noInit'
+        - protectionLevel: 'noInit'
+        - enable_custom_name: 'false'
+      - enable_tx_edma_channel: 'true'
+      - edma_tx_channel:
+        - uid: '1717764231482'
+        - eDMAn: '1'
+        - eDMA_source: 'kDma0RequestLPUART2Tx'
+        - init_channel_priority: 'false'
+        - edma_channel_Preemption:
+          - enableChannelPreemption: 'false'
+          - enablePreemptAbility: 'false'
+          - channelPriority: '0'
+        - masterIdReplicationEnable: 'noInit'
+        - protectionLevel: 'noInit'
+        - enable_custom_name: 'false'
+    - lpuart_edma_handle:
+      - enable_custom_name: 'false'
+      - init_callback: 'false'
+      - callback_fcn: ''
+      - user_data: ''
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const lpuart_config_t LPUART2_config = {
+  .baudRate_Bps = 115200UL,
+  .parityMode = kLPUART_ParityDisabled,
+  .dataBitsCount = kLPUART_EightDataBits,
+  .isMsb = false,
+  .stopBitCount = kLPUART_OneStopBit,
+  .txFifoWatermark = 0U,
+  .rxFifoWatermark = 1U,
+  .enableRxRTS = false,
+  .enableTxCTS = false,
+  .txCtsSource = kLPUART_CtsSourcePin,
+  .txCtsConfig = kLPUART_CtsSampleAtStart,
+  .rxIdleType = kLPUART_IdleTypeStartBit,
+  .rxIdleConfig = kLPUART_IdleCharacter1,
+  .enableTx = true,
+  .enableRx = true
+};
+edma_handle_t LPUART2_RX_Handle;
+edma_handle_t LPUART2_TX_Handle;
+lpuart_edma_handle_t LPUART2_LPUART_eDMA_Handle;
+
+static void LPUART2_init(void) {
+  LPUART_Init(LPUART2_PERIPHERAL, &LPUART2_config, LPUART2_CLOCK_SOURCE);
+  /* Set the kDma0RequestLPUART2Rx request */
+  EDMA_SetChannelMux(LPUART2_RX_DMA_BASEADDR, LPUART2_RX_DMA_CHANNEL, LPUART2_RX_DMA_REQUEST);
+  /* Set the kDma0RequestLPUART2Tx request */
+  EDMA_SetChannelMux(LPUART2_TX_DMA_BASEADDR, LPUART2_TX_DMA_CHANNEL, LPUART2_TX_DMA_REQUEST);
+  /* Create the eDMA LPUART2_RX_Handle handle */
+  EDMA_CreateHandle(&LPUART2_RX_Handle, LPUART2_RX_DMA_BASEADDR, LPUART2_RX_DMA_CHANNEL);
+  /* Create the eDMA LPUART2_TX_Handle handle */
+  EDMA_CreateHandle(&LPUART2_TX_Handle, LPUART2_TX_DMA_BASEADDR, LPUART2_TX_DMA_CHANNEL);
+  /* Create the LPUART eDMA handle */
+  LPUART_TransferCreateHandleEDMA(LPUART2_PERIPHERAL, &LPUART2_LPUART_eDMA_Handle, NULL, NULL, &LPUART2_TX_Handle, &LPUART2_RX_Handle);
+}
+
+/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 void BOARD_InitPeripherals(void)
 {
+  /* Global initialization */
+  (void)memset(DMA0_config.channelConfig, 0, FSL_FEATURE_EDMA_INSTANCE_CHANNELn(DMA0_DMA_BASEADDR) * sizeof(edma_channel_config_t *));
+  EDMA_Init(DMA0_DMA_BASEADDR, &DMA0_config);
+
   /* Initialize components */
   LPUART0_init();
   GPIO0_init();
   SysTick_init();
+  LPUART2_init();
 }
 
 /***********************************************************************************************************************

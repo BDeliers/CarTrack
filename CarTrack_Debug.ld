@@ -255,7 +255,7 @@ SECTIONS
     } > SRAM AT> SRAM
 
     /* Reserve and place Heap within memory map */
-    _HeapSize = 0x600;
+    _HeapSize = 0x0;
     .heap (NOLOAD) :  ALIGN(4)
     {
         _pvHeapStart = .;

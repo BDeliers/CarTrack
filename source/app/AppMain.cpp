@@ -4,8 +4,14 @@
 void AppMain::MainLoop(void)
 {
 	app_debug.Init();
+	app_modem.Init();
 
 	log_trace("Power up");
+	
+	if (!app_modem.DetectModem())
+	{
+		log_warn("Modem not detected");
+	}
 
 	for (;;)
 	{

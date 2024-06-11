@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AppDebug.hpp"
+#include "AppModem.hpp"
 
 /// @brief Main application class
 class AppMain
@@ -28,5 +29,6 @@ public:
 
 private:
 	AppDebug app_debug;
+	AppModem app_modem;
 
 };

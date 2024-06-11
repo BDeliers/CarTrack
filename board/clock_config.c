@@ -400,6 +400,7 @@ outputs:
 - {id: FRO_HF_DIV_clock.outFreq, value: 96 MHz}
 - {id: FRO_HF_clock.outFreq, value: 96 MHz}
 - {id: LPUART0_clock.outFreq, value: 8 MHz}
+- {id: LPUART2_clock.outFreq, value: 8 MHz}
 - {id: MAIN_clock.outFreq, value: 96 MHz}
 - {id: Slow_clock.outFreq, value: 24 MHz}
 - {id: System_clock.outFreq, value: 96 MHz}
@@ -408,10 +409,12 @@ settings:
 - {id: VDD_CORE, value: voltage_1v1}
 - {id: CLKOUTDIV_HALT, value: Enable}
 - {id: LPUART0CLKDIV_HALT, value: Enable}
+- {id: LPUART2CLKDIV_HALT, value: Enable}
 - {id: MRCC.FREQMEREFCLKSEL.sel, value: MRCC.aoi0_out0}
 - {id: MRCC.FREQMETARGETCLKSEL.sel, value: MRCC.aoi0_out0}
 - {id: MRCC.FROHFDIV.scale, value: '1', locked: true}
 - {id: MRCC.LPUART0CLKDIV.scale, value: '12', locked: true}
+- {id: MRCC.LPUART2CLKDIV.scale, value: '12', locked: true}
 - {id: MRCC.OSTIMERCLKSEL.sel, value: VBAT.CLK16K_1}
 - {id: SYSCON.AHBCLKDIV.scale, value: '1', locked: true}
 sources:
@@ -470,11 +473,13 @@ void BOARD_BootClockFRO96M(void)
 
     /*!< Set up clock selectors - Attach clocks to the peripheries */
     CLOCK_AttachClk(kFRO_HF_DIV_to_LPUART0);               /* !< Switch LPUART0 to FRO_HF_DIV */
+    CLOCK_AttachClk(kFRO_HF_DIV_to_LPUART2);               /* !< Switch LPUART2 to FRO_HF_DIV */
 
     /*!< Set up dividers */
     CLOCK_SetClockDiv(kCLOCK_DivAHBCLK, 1U);               /* !< Set AHBCLKDIV divider to value 1 */
     CLOCK_SetClockDiv(kCLOCK_DivFRO_HF_DIV, 1U);           /* !< Set FROHFDIV divider to value 1 */
     CLOCK_SetClockDiv(kCLOCK_DivLPTMR0, 12U);              /* !< Set LPUART0CLKDIV divider to value 12 */
+    CLOCK_SetClockDiv(kCLOCK_DivLPUART2, 12U);             /* !< Set LPUART2CLKDIV divider to value 12 */
 
     /* Set SystemCoreClock variable */
     SystemCoreClock = BOARD_BOOTCLOCKFRO96M_CORE_CLOCK;
