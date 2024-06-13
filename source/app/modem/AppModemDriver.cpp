@@ -1,5 +1,5 @@
-#include "AppModem.hpp"
-#include "AppCore.hpp"
+#include "AppModemDriver.hpp"
+#include "../AppCore.hpp"
 
 #include "peripherals.h"
 #include "pin_mux.h"
@@ -8,9 +8,9 @@ constexpr const char CR[]               = "\r";
 constexpr const char CRLF[]             = "\r\n";
 constexpr const char SIM7000_OK[]       = "OK";
 constexpr const char SIM7000_ERROR[]    = "ERROR";
-constexpr const char SIM7000_MODEL[]    = "SIMCOM_SIM7000G";
+constexpr const char SIM7000_SYNC_STR[] = "AT\r";
 
-void AppModem::Init(void)
+void AppModemDriver::Init(void)
 {
     // Initialize the peripherals pointers
     uart_ptr        = LPUART2_PERIPHERAL;
@@ -32,7 +32,7 @@ void AppModem::Init(void)
     StartReception();
 }
 
-bool AppModem::SendBuffer(void)
+bool AppModemDriver::SendBuffer(void)
 {
     // Don't mess the current transfer
     if (tx_started)
@@ -55,7 +55,7 @@ bool AppModem::SendBuffer(void)
     return false;
 }
 
-bool AppModem::StartReception(void)
+bool AppModemDriver::StartReception(void)
 {
     // No need to restart
     if (rx_started)
@@ -81,7 +81,7 @@ bool AppModem::StartReception(void)
     return false;
 }
 
-bool AppModem::ResetReception(void)
+bool AppModemDriver::ResetReception(void)
 {
     // Abort the transfer then restart reception
     LPUART_TransferAbortReceiveEDMA(uart_ptr, uart_dma_handle);
@@ -90,7 +90,7 @@ bool AppModem::ResetReception(void)
     return StartReception();
 }
 
-bool AppModem::BlockUntilOk(uint32_t timeout_ms)
+bool AppModemDriver::BlockUntilOk(uint32_t timeout_ms)
 {
     uint32_t cnt = 0;
 
@@ -119,7 +119,28 @@ bool AppModem::BlockUntilOk(uint32_t timeout_ms)
     return false;
 }
 
-bool AppModem::SendCommandBlocking(const SIM7000_CMDSET cmd, const CmdType type, const uint32_t timeout_ms, uint8_t params_count, ...)
+bool AppModemDriver::SynchronizeBaudrate(uint8_t n_tries)
+{
+    strcpy(buffer_tx, SIM7000_SYNC_STR);
+
+    for (uint8_t i = 1; i <= n_tries; i++)
+    {
+        // Reset reception to have a clean RX buffer, then send our command
+        if (ResetReception() && SendBuffer())
+        {
+            // Wait for the status to be received
+            if (BlockUntilOk(5))
+            {
+                log_debug("Modem synchronized after %u tries", i);
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool AppModemDriver::SendCommandBlocking(const SIM7000_CMDSET cmd, const CmdType type, const uint32_t timeout_ms, uint8_t params_count, ...)
 {
     bool ret = false;
 
@@ -145,7 +166,7 @@ bool AppModem::SendCommandBlocking(const SIM7000_CMDSET cmd, const CmdType type,
     return ret;
 }
 
-bool AppModem::RetrievePayload(char* buff, uint32_t buff_size)
+bool AppModemDriver::RetrievePayload(char* buff, const uint32_t buff_size)
 {
     uint32_t cnt = 0;
 
@@ -194,9 +215,9 @@ bool AppModem::RetrievePayload(char* buff, uint32_t buff_size)
     return false;
 }
 
-void AppModem::DmaTransferCallback(LPUART_Type *base, lpuart_edma_handle_t *handle, status_t status, void *userData)
+void AppModemDriver::DmaTransferCallback(LPUART_Type *base, lpuart_edma_handle_t *handle, status_t status, void *userData)
 {
-    AppModem* this_ptr = static_cast<AppModem*>(handle->userData);
+    AppModemDriver* this_ptr = static_cast<AppModemDriver*>(handle->userData);
 
     // Tx finished
     if (this_ptr->tx_started && (status = kStatus_LPUART_TxIdle))
@@ -208,22 +229,4 @@ void AppModem::DmaTransferCallback(LPUART_Type *base, lpuart_edma_handle_t *hand
     {
         this_ptr->rx_started = false;
     }
-}
-
-
-bool AppModem::DetectModem(void)
-{
-    if (SendCommandBlocking(REQUEST_MODEM_IDENTIFICATION, EXEC, 100, 0) > 0)
-    {
-        char buff[sizeof(SIM7000_MODEL)];
-        if (RetrievePayload(buff, sizeof(buff)))
-        {
-            if (strcmp(SIM7000_MODEL, buff) == 0)
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
 }

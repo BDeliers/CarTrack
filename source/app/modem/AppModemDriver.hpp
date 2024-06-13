@@ -8,26 +8,33 @@
 
 #include "utils/AtParser.hpp"
 
-/// @brief Class to handle the LTE-M modem
-class AppModem
+/// @brief Low-level driver for the SIM7000G modem
+class AppModemDriver
 {
 
-public:
+protected:
     /// @brief Initialize the modem communication
     void Init(void);
-
-    /// @brief      Checks that the right modem is connected
-    /// @return     True in case of successful detection
-    bool DetectModem(void);
-
-protected:
+    
     /// @brief Available commands for the SIM7000 modem
     enum SIM7000_CMDSET {
         REQUEST_MODEM_IDENTIFICATION,
         SET_DATA_FLOW_CONTROL,
         SET_COMMAND_ECHO_MODE,
+        RESET_DEFAULT_CONFIGURATION,
+        CONTROL_GPIO,
+        GNSS_POWER_CONTROL,
+        GNSS_NAVIGATION_INFORMATION,
+        GNSS_WORK_MODE_SET,
+        GNSS_COLD_START,
+        GNSS_CONFIGURE_POSITION_ACCURACY,
         SIM700_CMDSET_LEN,
     };
+
+    /// @brief          Tries to make the modem detect the MCU's baudrate (cf UART application note)
+    /// @param n_tries  Number of retries
+    /// @return         True if success
+    bool SynchronizeBaudrate(uint8_t n_tries);
 
     /// @brief              Send a command and block until success or timeout
     /// @param cmd          Command to be sent to the modem
@@ -42,7 +49,10 @@ protected:
     /// @param buff         Buffer to fill with the payload
     /// @param buff_size    Number of bytes copied
     /// @return             True in case of success
-    bool RetrievePayload(char* buff, uint32_t buff_size);
+    bool RetrievePayload(char* buff, const uint32_t buff_size);
+
+    bool echo_enabled{true};
+
 
 private:
     static void DmaTransferCallback(LPUART_Type *base, lpuart_edma_handle_t *handle, status_t status, void *userData);
@@ -81,11 +91,17 @@ private:
     volatile bool tx_started{false};
     volatile bool rx_started{false};
 
-    bool echo_enabled{true};
-
     static constexpr const char* SIM7000_OPCODES[SIM700_CMDSET_LEN] = {
-        "CGMM",
-        "IFC",
-        "ATE",
+        "CGMM",         // REQUEST_MODEM_IDENTIFICATION
+        "IFC",          // SET_DATA_FLOW_CONTROL
+        "ATE",          // SET_COMMAND_ECHO_MODE
+        "ATZ",          // RESET_DEFAULT_CONFIGURATION
+        "SGPIO",        // CONTROL_GPIO
+        "CGNSPWR",      // GNSS_POWER_CONTROL
+        "CGNSINF",      // GNSS_NAVIGATION_INFORMATION
+        "CGNSMOD",      // GNSS_WORK_MODE_SET
+        "CGNSCOLD",     // GNSS_COLD_START
+        "CGNSHOR",      // GNSS_CONFIGURE_POSITION_ACCURACY
     };
+
 };

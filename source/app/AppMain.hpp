@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AppDebug.hpp"
-#include "AppModem.hpp"
+#include "modem/AppModem.hpp"
 
 /// @brief Main application class
 class AppMain
@@ -30,5 +30,7 @@ public:
 private:
 	AppDebug app_debug;
 	AppModem app_modem;
+
+	bool modem_init_success{false};
 
 };

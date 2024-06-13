@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "array": "cpp",
-        "assert.h": "c",
-        "fsl_common.h": "c"
-    }
-}

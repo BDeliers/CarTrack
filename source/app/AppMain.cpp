@@ -4,18 +4,33 @@
 void AppMain::MainLoop(void)
 {
 	app_debug.Init();
-	app_modem.Init();
 
 	log_trace("Power up");
+	app_debug.Flush();
 	
-	if (!app_modem.DetectModem())
+	if (app_modem.Init())
 	{
-		log_warn("Modem not detected");
+		if (app_modem.EnableGnss(true))
+		{
+			modem_init_success = true;
+		}
+	}
+
+	if (!modem_init_success)
+	{
+		log_warn("Modem init failed");
 	}
 
 	for (;;)
 	{
 		app_debug.Flush();
+
+		if (modem_init_success)
+		{
+			app_modem.RetrieveGnssData();
+		}
+
+		AppCore_BlockingDelayMs(1000);
 	}
 }
 
