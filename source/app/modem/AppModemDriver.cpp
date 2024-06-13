@@ -30,6 +30,11 @@ void AppModemDriver::Init(void)
 
     // Start to receive data
     StartReception();
+
+    /*if (SendCommandBlocking(SET_COMMAND_ECHO_MODE, EXEC, 100, 1, "0"))
+    {
+        echo_enabled = false;
+    }*/
 }
 
 bool AppModemDriver::SendBuffer(void)
@@ -197,7 +202,7 @@ bool AppModemDriver::RetrievePayload(char* buff, const uint32_t buff_size)
                 return false;
             }
 
-            // Payload starts after the command echo + CRLF (twice)
+            // Payload starts after the command echo
             payload_ptr_start += strlen(CRLF);
         }
 

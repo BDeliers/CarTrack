@@ -31,6 +31,8 @@ private:
 	AppDebug app_debug;
 	AppModem app_modem;
 
+	GpsInfo last_gps_info;
+
 	bool modem_init_success{false};
 
 };

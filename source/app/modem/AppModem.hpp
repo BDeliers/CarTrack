@@ -1,5 +1,7 @@
 #include "AppModemDriver.hpp"
 
+#include "utils/GpsInfo.hpp"
+
 class AppModem : private AppModemDriver
 {
 
@@ -16,7 +18,10 @@ public:
     /// @return         True in case of success
     bool EnableGnss(bool enable);
 
-    bool RetrieveGnssData(void);
+    /// @brief      Retrieve the GNSS data
+    /// @param info GpsInfo object to fill-in
+    /// @return     True if data has been acquired and parsed
+    bool RetrieveGnssData(GpsInfo& info);
 
 private:
     bool gnss_has_fix{false};

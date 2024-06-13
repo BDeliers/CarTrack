@@ -27,7 +27,7 @@ void AppMain::MainLoop(void)
 
 		if (modem_init_success)
 		{
-			app_modem.RetrieveGnssData();
+			app_modem.RetrieveGnssData(last_gps_info);
 		}
 
 		AppCore_BlockingDelayMs(1000);
