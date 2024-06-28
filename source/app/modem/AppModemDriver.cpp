@@ -10,7 +10,7 @@ constexpr const char SIM7000_OK[]       = "OK";
 constexpr const char SIM7000_ERROR[]    = "ERROR";
 constexpr const char SIM7000_SYNC_STR[] = "AT\r";
 
-void AppModemDriver::Init(void)
+bool AppModemDriver::Init(void)
 {
     // Initialize the peripherals pointers
     uart_ptr        = LPUART2_PERIPHERAL;
@@ -28,13 +28,25 @@ void AppModemDriver::Init(void)
     //AppCore_BlockingDelayMs(300);
     //GPIO_PinWrite(BOARD_INITPINS_MODEM_RST_GPIO, BOARD_INITPINS_MODEM_RST_PIN, 1);
 
-    // Start to receive data
-    StartReception();
+    // After a power-up, it can take up to some time for UART to be available
+    AppCore_BlockingDelayMs(5000);
 
-    /*if (SendCommandBlocking(SET_COMMAND_ECHO_MODE, EXEC, 100, 1, "0"))
+    // Try a baud rate synchronization
+    if (SynchronizeBaudrate(255))
     {
-        echo_enabled = false;
-    }*/
+    	AppCore_BlockingDelayMs(100);
+
+        EnableExtendedErorr(true);
+
+        /*if (SendCommandBlocking(SET_COMMAND_ECHO_MODE, EXEC, 100, 1, "0"))
+        {
+            echo_enabled = false;
+        }*/
+
+        return DetectModem();
+    }
+
+    return false;
 }
 
 bool AppModemDriver::SendBuffer(void)
@@ -108,12 +120,12 @@ bool AppModemDriver::BlockUntilOk(uint32_t timeout_ms)
 
     do 
     {
-        // When we have enough data in the buffer, check if it's "OK"
-        if (LPUART_TransferGetReceiveCountEDMA(uart_ptr, uart_dma_handle, &cnt) == kStatus_Success 
+        // When we have enough data in the buffer and UART is idle, check if it's "OK"
+        if (LPUART_TransferGetReceiveCountEDMA(uart_ptr, uart_dma_handle, &cnt) == kStatus_Success
+            && LPUART_GetStatusFlags(uart_ptr) & kLPUART_IdleLineFlag
             && cnt > strlen(SIM7000_OK))
         {
-            // We don't use strcmp as the buffer still contains the CRLF
-            if (memcmp((buffer_rx + cnt - strlen(SIM7000_OK) - strlen(CRLF)), SIM7000_OK, strlen(SIM7000_OK)) == 0)
+            if (strstr(buffer_rx, SIM7000_OK) != NULL)
             {
                 return true;
             }   
@@ -178,12 +190,8 @@ bool AppModemDriver::RetrievePayload(char* buff, const uint32_t buff_size)
     if (LPUART_TransferGetReceiveCountEDMA(uart_ptr, uart_dma_handle, &cnt) == kStatus_Success
         && cnt > 0)
     {
-        // We're after the OK\r\n
-        char* payload_ptr_end = buffer_rx + cnt;
-        // We're after the OK
-        payload_ptr_end -= strlen(CRLF);
         // We're before the OK
-        payload_ptr_end -= strlen(SIM7000_OK);
+        char* payload_ptr_end = strstr(buffer_rx, SIM7000_OK);
         // We're after the payload
         payload_ptr_end -= strlen(CRLF)*2;
         // We're at the last character of the payload
@@ -194,8 +202,8 @@ bool AppModemDriver::RetrievePayload(char* buff, const uint32_t buff_size)
         // Get rid of the command echo
         if (echo_enabled)
         {
-            // Locate the first CRLF which is after the command echo
-            payload_ptr_start = strstr(buffer_rx, CRLF);
+            // Locate the first CRLF which is after the command echo (use +2 in case of old CRLF in buffer)
+            payload_ptr_start = strstr(buffer_rx+2, CRLF);
 
             if (payload_ptr_start == NULL)
             {
@@ -215,6 +223,37 @@ bool AppModemDriver::RetrievePayload(char* buff, const uint32_t buff_size)
             memcpy(buff, payload_ptr_start, payload_ptr_end - payload_ptr_start + 1);
             return true;
         }
+    }
+
+    return false;
+}
+
+// -- GENERIC ACTIONS
+
+bool AppModemDriver::DetectModem(void)
+{
+    if (SendCommandBlocking(REQUEST_MODEM_IDENTIFICATION, EXEC, 100, 0))
+    {
+        const char SIM7000_MODEL[] = "SIMCOM_SIM7000G";
+        char buff[sizeof(SIM7000_MODEL)];
+        if (RetrievePayload(buff, sizeof(buff)))
+        {
+            if (strcmp(SIM7000_MODEL, buff) == 0)
+            {
+                log_debug("SIM700G detected");
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool AppModemDriver::EnableExtendedErorr(bool enable)
+{
+    if (SendCommandBlocking(GPP3_REPORT_MOBILE_EQUIPEMENT_ERROR, WRITE, 100, 1, enable ? "2" : "0"))  // result code + verbose
+    {
+        return true;
     }
 
     return false;

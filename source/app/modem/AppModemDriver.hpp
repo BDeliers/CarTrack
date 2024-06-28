@@ -13,8 +13,9 @@ class AppModemDriver
 {
 
 protected:
-    /// @brief Initialize the modem communication
-    void Init(void);
+    /// @brief  Initialize the modem communication
+    /// @return False if init failed
+    bool Init(void);
     
     /// @brief Available commands for the SIM7000 modem
     enum SIM7000_CMDSET {
@@ -23,11 +24,29 @@ protected:
         SET_COMMAND_ECHO_MODE,
         RESET_DEFAULT_CONFIGURATION,
         CONTROL_GPIO,
+        PREFERRED_MODE_SELECTION,
+        PREFERRED_SELECTION_LTE,
+        APP_NETWORK_ACTIVE,
+        PDP_CONFIGURE,
         GNSS_POWER_CONTROL,
         GNSS_NAVIGATION_INFORMATION,
         GNSS_WORK_MODE_SET,
         GNSS_COLD_START,
         GNSS_CONFIGURE_POSITION_ACCURACY,
+        GPP3_REPORT_MOBILE_EQUIPEMENT_ERROR,
+        GPP3_MOBILE_ENTER_PIN,
+        GPP3_NETWORK_REGISTRATION,
+        GPP3_SIGNAL_QUALITY_REPORT,
+        GPP3_SET_PHONE_FUNCTIONNALITY,
+        GPP3_OPERATOR_SELECTION,
+        GPRS_ATTACH_DETACH_SERVICE,
+        GPRS_DEFINE_PDP_CONTEXT,
+        GPRS_NETWORK_REGISTRATION_STATUS,
+        IP_BEARER_SETTINGS,
+        TCPIP_START_TASK_SET_APN,
+        TCPIP_BRING_UP_CONNECTION,
+        TCPIP_SHUTDOWN_CONNECTION,
+        PING_SEND_IPV4,
         SIM700_CMDSET_LEN,
     };
 
@@ -51,8 +70,18 @@ protected:
     /// @return             True in case of success
     bool RetrievePayload(char* buff, const uint32_t buff_size);
 
-    bool echo_enabled{true};
+    // -- GENERIC ACTIONS
 
+    /// @brief      Checks that the right modem is connected
+    /// @return     True in case of successful detection
+    bool DetectModem(void);
+
+    /// @brief          Enabled detailed verbose debug info
+    /// @param enable   True to enable, false to disable
+    /// @return         True in case of success
+    bool EnableExtendedErorr(bool enable);
+
+    bool echo_enabled{true};
 
 private:
     static void DmaTransferCallback(LPUART_Type *base, lpuart_edma_handle_t *handle, status_t status, void *userData);
@@ -97,11 +126,29 @@ private:
         "ATE",          // SET_COMMAND_ECHO_MODE
         "ATZ",          // RESET_DEFAULT_CONFIGURATION
         "SGPIO",        // CONTROL_GPIO
+        "CNMP",         // PREFERRED_MODE_SELECTION
+        "CMNB",         // PREFERRED_SELECTION_LTE
+        "CNACT",        // APP_NETWORK_ACTIVE
+        "CNCFG",        // PDP_CONFIGURE
         "CGNSPWR",      // GNSS_POWER_CONTROL
         "CGNSINF",      // GNSS_NAVIGATION_INFORMATION
         "CGNSMOD",      // GNSS_WORK_MODE_SET
         "CGNSCOLD",     // GNSS_COLD_START
         "CGNSHOR",      // GNSS_CONFIGURE_POSITION_ACCURACY
+        "CMEE",         // GPP3_REPORT_MOBILE_EQUIPEMENT_ERROR
+        "CPIN",         // GPP3_MOBILE_ENTER_PIN
+        "CREG",         // GPP3_NETWORK_REGISTRATION
+        "CSQ",          // GPP3_SIGNAL_QUALITY_REPORT
+        "CFUN",         // GPP3_SET_PHONE_FUNCTIONNALITY
+        "COPS",         // GPP3_OPERATOR_SELECTION
+        "CGATT",        // GPRS_ATTACH_DETACH_SERVICE
+        "CGDCONT",      // GPRS_DEFINE_PDP_CONTEXT
+        "CGREG",        // GPRS_NETWORK_REGISTRATION_STATUS
+        "SAPBR",        // IP_BEARER_SETTINGS
+        "CSTT",         // TCPIP_START_TASK_SET_APN
+        "CIICR",        // TCPIP_BRING_UP_CONNECTION
+        "CIPSHUT",      // TCPIP_SHUTDOWN_CONNECTION
+        "SNPING4",      // PING_SEND_IPV4
     };
 
 };

@@ -12,8 +12,8 @@ public:
     bool IsEmpty(void);
 
 private:
-    const uint16_t size{256};
-    std::array<char, 256> buffer;
+    const uint16_t size{512};
+    std::array<char, 512> buffer;
     uint16_t head{0};
     uint16_t tail{0};
     uint16_t usage{0};

@@ -34,5 +34,8 @@ private:
 	GpsInfo last_gps_info;
 
 	bool modem_init_success{false};
+	bool modem_network_attached{false};
+	bool modem_network_configured{false};
+	bool got_ip{false};
 
 };

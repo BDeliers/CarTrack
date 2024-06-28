@@ -3,6 +3,8 @@
 
 void AppMain::MainLoop(void)
 {
+	char ip[17];
+
 	app_debug.Init();
 
 	log_trace("Power up");
@@ -10,7 +12,10 @@ void AppMain::MainLoop(void)
 	
 	if (app_modem.Init())
 	{
-		if (app_modem.EnableGnss(true))
+		if (app_modem.EnableGnss(true)
+			&& app_modem.SetPhoneMode(true)
+			&& app_modem.CheckSimReady()
+			&& app_modem.ConfigureLte())
 		{
 			modem_init_success = true;
 		}
@@ -28,6 +33,40 @@ void AppMain::MainLoop(void)
 		if (modem_init_success)
 		{
 			app_modem.RetrieveGnssData(last_gps_info);
+
+			if (!modem_network_attached)
+			{
+				modem_network_attached = app_modem.CheckNetworkRegistration();
+			}
+
+			if (modem_network_attached && !modem_network_configured)
+			{
+				modem_network_configured = app_modem.EnableGprs(true, "\"iot.1nce.net\"", "\"\"", "\"\"");
+
+				if (modem_network_configured)
+				{
+					app_modem.EnableAppNetwork(true);
+				}
+			}
+
+			app_modem.CheckSignalQuality();
+
+			if (modem_network_configured && !got_ip)
+			{
+				if (app_modem.GetIp(ip))
+				{
+					if (strcmp(ip, "0.0.0.0") != 0)
+					{
+						log_info("IP address assigned %s", ip);
+						got_ip = true;
+					}
+				}
+			}
+
+			if (got_ip)
+			{
+				app_modem.SendPingRequest("\"www.google.fr\"");
+			}
 		}
 
 		AppCore_BlockingDelayMs(1000);
