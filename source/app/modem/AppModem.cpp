@@ -299,3 +299,27 @@ bool AppModem::SendPingRequest(char* url)
 
     return false;
 }
+
+bool AppModem::SendCoapRequest(char* url, ReqMethod method, char* uri, char* query, char* payload)
+{
+    SendCommandBlocking(COAP_DELETE_OBJECT, EXEC, 1e3, 0);
+
+    char code[2] = {0, 0};
+    sprintf(code, "%u", method);
+
+    if (app_network_enabled
+        && SendCommandBlocking(COAP_CREATE_OBJECT, EXEC, 1e3, 0)                                    // Create CoAp request
+        && SendCommandBlocking(COAP_CONFIGURE_URL, WRITE, 1e3, 1, url)                              // Configure CoAp URL
+        && SendCommandBlocking(COAP_ASSEMBLE_DATA_PACKET, WRITE, 1e3, 11,                           // Make the CoAp request body
+                                                                        "code", code, 
+                                                                        "uri-path", "0", uri, 
+                                                                        "uri-query", "0", query, 
+                                                                        "payload", "0", payload)
+        && SendCommandBlocking(COAP_OPERATE_OBJECT, EXEC, 10e3, 0)                                  // Send the CoAp request
+        && SendCommandBlocking(COAP_DELETE_OBJECT, EXEC, 1e3, 0))                                   // Delete the CoAp request
+    {
+        return true;
+    }
+
+    return false;
+}

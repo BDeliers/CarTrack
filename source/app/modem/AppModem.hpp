@@ -6,6 +6,14 @@ class AppModem : private AppModemDriver
 {
 
 public:
+    enum class ReqMethod
+    {
+        GET = 1,
+        POST,
+        PUT,
+        DELETE,
+    };
+
     /// @brief Initialize the modem
     bool Init(void);
 
@@ -48,15 +56,42 @@ public:
     /// @return RSSI from 0 (lowest) to 31 (best). 99 means no network.
     uint8_t CheckSignalQuality(void);
 
+    /// @brief          Enable the GPRS communication
+    /// @param enable   Enable or disable
+    /// @param apn      APN, between quotes (like "\"my.apn.com\"")
+    /// @param user     Username, quoted same as APN
+    /// @param password Password, quoted same as APN
+    /// @return         True in case of success
     bool EnableGprs(bool enable, char* apn, char* user, char* password);
 
     // -- IP RELATED ACTIONS
 
+    /// @brief          Activate or de-activate the IP connectivity
+    /// @param enable   Enable or disable
+    /// @return         True in case of success
     bool EnableAppNetwork(bool enable);
 
+    /// @brief      Get the module's IP address
+    /// @param ip   Buffer to fill in
+    /// @return     True in case of success
     bool GetIp(char* ip);
 
+    /// @brief      Send a PING to the given URL
+    /// @note       This doesn't work, for some unknown reasons
+    /// @param url  URL to ping
+    /// @return     True in case of success
     bool SendPingRequest(char* url);
+
+    // -- COAP RELATED ACTIONS
+
+    /// @brief          Send a CoAp request
+    /// @param url      URL to send the request to, between quotes (like "\"my.url.com\"")
+    /// @param method   Method to use (GET, POST, PUT, DELETE)
+    /// @param uri      URI below the URL, quoted same as URL
+    /// @param query    Query parameters below the URI, quoted same as URL
+    /// @param payload  Payload to be sent, quoted same as URL
+    /// @return         True in case of success
+    bool SendCoapRequest(char* url, ReqMethod method, char* uri, char* query, char* payload);
 
 private:
     bool gnss_has_fix{false};

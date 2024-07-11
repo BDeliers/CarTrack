@@ -65,7 +65,7 @@ void AppMain::MainLoop(void)
 
 			if (got_ip)
 			{
-				app_modem.SendPingRequest("\"www.google.fr\"");
+				// Main app will go here
 			}
 		}
 
