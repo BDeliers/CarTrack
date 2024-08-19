@@ -1,3 +1,6 @@
 [submodule "modules/log.c"]
 	path = modules/log.c
 	url = https://github.com/BDeliers/log.c
+[submodule "modules/nanopb"]
+	path = modules/nanopb
+	url = https://github.com/nanopb/nanopb.git

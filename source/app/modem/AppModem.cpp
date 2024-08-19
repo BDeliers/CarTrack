@@ -152,8 +152,9 @@ bool AppModem::CheckNetworkRegistration(void)
                 {
                     network_attached = true;
                     log_debug("Attached to network");
-                    return true;
                 }
+
+                return true;
             }
             else if (network_attached)
             {
@@ -211,15 +212,15 @@ bool AppModem::EnableGprs(bool enable, char* apn, char* user, char* password)
 {
     if (enable)
     {
-        if(SendCommandBlocking(GPRS_DEFINE_PDP_CONTEXT, WRITE, 1e3, 3, "1", "\"IP\"", apn)                  // Set PDP context for GPRS
+        if(SendCommandBlocking(GPRS_DEFINE_PDP_CONTEXT, WRITE, 1e3, 3, "1", QUOTE("IP"), apn)               // Set PDP context for GPRS
             && SendCommandBlocking(GPRS_ATTACH_DETACH_SERVICE, WRITE, 75e3, 1, "1"))                        // Attach GPRS service
         {
             if (SendCommandBlocking(TCPIP_SHUTDOWN_CONNECTION, EXEC, 1e3, 0)                                // Close all TCPIP connections
-                && SendCommandBlocking(IP_BEARER_SETTINGS, WRITE, 1e3, 4, "3", "1", "\"APN\"", apn)         // Set APN for bearer 1
+                && SendCommandBlocking(IP_BEARER_SETTINGS, WRITE, 1e3, 4, "3", "1", QUOTE("APN"), apn)      // Set APN for bearer 1
                 && SendCommandBlocking(TCPIP_START_TASK_SET_APN, WRITE, 1e3, 3, apn, user, password)        // Set APN, user and pass for IP operations
-                && SendCommandBlocking(IP_BEARER_SETTINGS, WRITE, 1e3, 4, "3", "1", "\"USER\"", user)       // Set username for bearer 1
-                && SendCommandBlocking(IP_BEARER_SETTINGS, WRITE, 1e3, 4, "3", "1", "\"PWD\"", password)    // Set password for bearer 1
-                && SendCommandBlocking(IP_BEARER_SETTINGS, WRITE, 85e3, 2, "1", "1")                        // Open bearer
+                && SendCommandBlocking(IP_BEARER_SETTINGS, WRITE, 1e3, 4, "3", "1", QUOTE("USER"), user)    // Set username for bearer 1
+                && SendCommandBlocking(IP_BEARER_SETTINGS, WRITE, 1e3, 4, "3", "1", QUOTE("PWD"), password) // Set password for bearer 1
+                && SendCommandBlocking(IP_BEARER_SETTINGS, WRITE, 10e3, 2, "1", "1")                        // Open bearer 1
                 && SendCommandBlocking(TCPIP_BRING_UP_CONNECTION, EXEC, 85e3, 0))                           // Start TCPIP connection
             {
                 log_debug("Network configured");
@@ -236,7 +237,7 @@ bool AppModem::EnableGprs(bool enable, char* apn, char* user, char* password)
             && SendCommandBlocking(GPRS_ATTACH_DETACH_SERVICE, WRITE, 65e3, 1, "0"))    // Detach GPRS
         {
             log_debug("Network unconfigured");
-            memset(apn, 0, sizeof(apn));
+            memset(retained_apn, 0, sizeof(retained_apn));
             network_configured = false;
             return true;
         }
@@ -300,7 +301,7 @@ bool AppModem::SendPingRequest(char* url)
     return false;
 }
 
-bool AppModem::SendCoapRequest(char* url, ReqMethod method, char* uri, char* query, char* payload)
+bool AppModem::SendCoapRequest(const char* url, ReqMethod method, char* uri, char* query, char* payload)
 {
     SendCommandBlocking(COAP_DELETE_OBJECT, EXEC, 1e3, 0);
 

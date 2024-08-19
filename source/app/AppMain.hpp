@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AppDebug.hpp"
-#include "modem/AppModem.hpp"
+#include "AppMainStateMachine.hpp"
 
 /// @brief Main application class
 class AppMain
@@ -29,13 +29,6 @@ public:
 
 private:
 	AppDebug app_debug;
-	AppModem app_modem;
-
-	GpsInfo last_gps_info;
-
-	bool modem_init_success{false};
-	bool modem_network_attached{false};
-	bool modem_network_configured{false};
-	bool got_ip{false};
+	AppMainStateMachine app_main_state_machine;
 
 };

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ctime>
 #include <cstring>
 #include <stdint.h>
@@ -10,7 +12,7 @@ public:
     void SetTimestamp(time_t timestamp)                     { this->timestamp           = timestamp;            };
     void SetLatitude(int32_t latitude)                      { this->latitude            = latitude;             };
     void SetLongitude(int32_t longitude)                    { this->longitude           = longitude;            };
-    void SetAltitude(uint32_t altitude)                     { this->altitude            = altitude;             };
+    void SetAltitude(int32_t altitude)                      { this->altitude            = altitude;             };
     void SetSpeed(uint16_t speed)                           { this->speed               = speed;                };
     void SetCourse(uint16_t course)                         { this->course              = course;               };
     void SetHdop(uint8_t hdop)                              { this->hdop                = hdop;                 };
@@ -38,7 +40,7 @@ public:
 
     /// @brief  Getter
     /// @return Altitude compared to sea level, in milimeters
-    uint32_t    GetAltitude(void)               const { return this->altitude;              };
+    int32_t     GetAltitude(void)               const { return this->altitude;              };
 
     /// @brief  Getter
     /// @return Speed over ground, in decameters per hour
@@ -81,7 +83,7 @@ private:
     time_t      timestamp{0};
     int32_t     latitude{0};
     int32_t     longitude{0};
-    uint32_t    altitude{0};
+    int32_t     altitude{0};
     uint16_t    speed{0};
     uint16_t    course{0};
     uint8_t     hdop{0};

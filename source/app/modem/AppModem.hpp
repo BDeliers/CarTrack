@@ -2,6 +2,9 @@
 
 #include "utils/GpsInfo.hpp"
 
+/// @brief  Macro to add escaped quote to a string, transforming "string" to "\"string\""
+#define QUOTE(str) "\"" str "\""
+
 class AppModem : private AppModemDriver
 {
 
@@ -91,7 +94,7 @@ public:
     /// @param query    Query parameters below the URI, quoted same as URL
     /// @param payload  Payload to be sent, quoted same as URL
     /// @return         True in case of success
-    bool SendCoapRequest(char* url, ReqMethod method, char* uri, char* query, char* payload);
+    bool SendCoapRequest(const char* url, ReqMethod method, char* uri, char* query, char* payload);
 
 private:
     bool gnss_has_fix{false};
