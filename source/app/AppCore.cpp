@@ -3,7 +3,11 @@
 
 #include <cstring>
 #include <ctime>
+
 #include "fsl_common_arm.h"
+#include "fsl_ostimer.h"
+#include "fsl_cmc.h"
+#include "peripherals.h"
 
 
 // --- LOCAL VARIABLES ---
@@ -66,4 +70,22 @@ void AppCore_BlockingDelayMs(uint32_t delay)
     uint64_t end = tick_count + delay;
 
     while (tick_count != end);
+}
+
+void AppCore_DeepSleepMs(uint32_t delay)
+{
+    // Set the OSTIMER to wake up after the delay
+    uint64_t timer_ticks = OSTIMER_GetCurrentTimerValue(OSTIMER0_PERIPHERAL);
+    timer_ticks += MSEC_TO_COUNT(delay, OSTIMER0_CLK_FREQ);
+    OSTIMER_SetMatchValue(OSTIMER0_PERIPHERAL, timer_ticks, NULL);
+
+    // Enable IRQ under deep sleep
+    EnableIRQ(OS_EVENT_IRQn);
+
+    CMC_EnableDebugOperation(CMC, false);
+    CMC_SetPowerModeProtection(CMC, kCMC_AllowAllLowPowerModes);
+    CMC_ConfigFlashMode(CMC, true, true, true);
+
+    // Go to sleep
+    CMC_GlobalEnterLowPowerMode(CMC, kCMC_DeepSleepMode);
 }

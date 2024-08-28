@@ -107,7 +107,7 @@ bool AppModemDriver::ResetReception(void)
     return StartReception();
 }
 
-bool AppModemDriver::BlockUntilOk(uint32_t timeout_ms)
+bool AppModemDriver::BlockUntilMessage(uint32_t timeout_ms, const char* message)
 {
     uint32_t cnt = 0;
 
@@ -123,9 +123,9 @@ bool AppModemDriver::BlockUntilOk(uint32_t timeout_ms)
         // When we have enough data in the buffer and UART is idle, check if it's "OK"
         if (LPUART_TransferGetReceiveCountEDMA(uart_ptr, uart_dma_handle, &cnt) == kStatus_Success
             && LPUART_GetStatusFlags(uart_ptr) & kLPUART_IdleLineFlag
-            && cnt > strlen(SIM7000_OK))
+            && cnt > strlen(message))
         {
-            if (strstr(buffer_rx, SIM7000_OK) != NULL)
+            if (strstr(buffer_rx, message) != NULL)
             {
                 return true;
             }   
@@ -134,6 +134,11 @@ bool AppModemDriver::BlockUntilOk(uint32_t timeout_ms)
     while (AppCore_GetUptimeMs() < timeout_end);
 
     return false;
+}
+
+bool AppModemDriver::BlockUntilOk(uint32_t timeout_ms)
+{
+    return BlockUntilMessage(timeout_ms, SIM7000_OK);
 }
 
 bool AppModemDriver::SynchronizeBaudrate(uint8_t n_tries)
@@ -157,7 +162,7 @@ bool AppModemDriver::SynchronizeBaudrate(uint8_t n_tries)
     return false;
 }
 
-bool AppModemDriver::SendCommandBlocking(const SIM7000_CMDSET cmd, const CmdType type, const uint32_t timeout_ms, uint8_t params_count, ...)
+bool AppModemDriver::SendCommandBlocking(const SIM7000_CMDSET cmd, const CmdType type, const uint32_t timeout_ms, const char* message, const uint8_t params_count, ...)
 {
     bool ret = false;
 
@@ -171,6 +176,32 @@ bool AppModemDriver::SendCommandBlocking(const SIM7000_CMDSET cmd, const CmdType
         if (ResetReception() && SendBuffer())
         {
             // Wait for the status to be received
+            if (BlockUntilMessage(timeout_ms, message))
+            {
+                ret = true;
+            }
+        }
+    }
+
+    va_end(params);
+
+    return ret;
+}
+
+bool AppModemDriver::SendCommandBlocking(const SIM7000_CMDSET cmd, const CmdType type, const uint32_t timeout_ms, const uint8_t params_count, ...)
+{
+    bool ret = false;
+
+    va_list params;
+    va_start(params, params_count);
+
+    // Make the command buffer 
+    if (AtParser_MakeCommand(type, buffer_tx, TX_BUFFER_SIZE, SIM7000_OPCODES[cmd], params_count, params) > 0)
+    {
+        // Reset reception to have a clean RX buffer, then send our command
+        if (ResetReception() && SendBuffer())
+        {
+            // Wait for the OK to be received
             if (BlockUntilOk(timeout_ms))
             {
                 ret = true;

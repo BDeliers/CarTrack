@@ -279,25 +279,29 @@
                      </feature>
                   </dependency>
                </dependencies>
-               <clock_sources>
-                  <clock_source id="SCG.FIRC.outFreq" value="96 MHz" locked="false" enabled="false"/>
-               </clock_sources>
+               <clock_sources/>
                <clock_outputs>
+                  <clock_output id="CLK16K_0_clock.outFreq" value="16.384 kHz" locked="false" accuracy=""/>
+                  <clock_output id="CLK16K_1_clock.outFreq" value="16.384 kHz" locked="false" accuracy=""/>
                   <clock_output id="CLK_1M_clock.outFreq" value="1 MHz" locked="false" accuracy=""/>
                   <clock_output id="CLK_48M_clock.outFreq" value="48 MHz" locked="false" accuracy=""/>
-                  <clock_output id="CPU_clock.outFreq" value="96 MHz" locked="false" accuracy=""/>
+                  <clock_output id="CPU_clock.outFreq" value="48 MHz" locked="false" accuracy=""/>
                   <clock_output id="FRO_12M_clock.outFreq" value="12 MHz" locked="false" accuracy=""/>
-                  <clock_output id="FRO_HF_DIV_clock.outFreq" value="96 MHz" locked="false" accuracy=""/>
-                  <clock_output id="FRO_HF_clock.outFreq" value="96 MHz" locked="false" accuracy=""/>
-                  <clock_output id="LPUART0_clock.outFreq" value="8 MHz" locked="false" accuracy=""/>
-                  <clock_output id="LPUART2_clock.outFreq" value="8 MHz" locked="false" accuracy=""/>
-                  <clock_output id="MAIN_clock.outFreq" value="96 MHz" locked="false" accuracy=""/>
-                  <clock_output id="Slow_clock.outFreq" value="24 MHz" locked="false" accuracy=""/>
-                  <clock_output id="System_clock.outFreq" value="96 MHz" locked="false" accuracy=""/>
+                  <clock_output id="FRO_HF_DIV_clock.outFreq" value="48 MHz" locked="false" accuracy=""/>
+                  <clock_output id="FRO_HF_clock.outFreq" value="48 MHz" locked="false" accuracy=""/>
+                  <clock_output id="LPUART0_clock.outFreq" value="4 MHz" locked="false" accuracy=""/>
+                  <clock_output id="LPUART2_clock.outFreq" value="4 MHz" locked="false" accuracy=""/>
+                  <clock_output id="MAIN_clock.outFreq" value="48 MHz" locked="false" accuracy=""/>
+                  <clock_output id="OSTIMER_clock.outFreq" value="16.384 kHz" locked="false" accuracy=""/>
+                  <clock_output id="Slow_clock.outFreq" value="12 MHz" locked="false" accuracy=""/>
+                  <clock_output id="System_clock.outFreq" value="48 MHz" locked="false" accuracy=""/>
                   <clock_output id="UTICK_clock.outFreq" value="1 MHz" locked="false" accuracy=""/>
+                  <clock_output id="WUU_clock.outFreq" value="16.384 kHz" locked="false" accuracy=""/>
                </clock_outputs>
                <clock_settings>
                   <setting id="VDD_CORE" value="voltage_1v1" locked="false"/>
+                  <setting id="CLK16K0_EN" value="enabled" locked="false"/>
+                  <setting id="CLK16K1_EN" value="enabled" locked="false"/>
                   <setting id="CLKOUTDIV_HALT" value="Enable" locked="false"/>
                   <setting id="LPUART0CLKDIV_HALT" value="Enable" locked="false"/>
                   <setting id="LPUART2CLKDIV_HALT" value="Enable" locked="false"/>
@@ -350,6 +354,16 @@
             <dependency resourceType="SWComponent" resourceId="platform.drivers.edma4" description="An unsupported version of the EDMA Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. The project might not compile correctly." problem_level="1" source="Peripherals">
                <feature name="version" evaluation="greaterOrEqual">
                   <data type="Version" maxValue="2.8.9">2.7.0</data>
+               </feature>
+            </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.ostimer" description="OSTimer Driver is not found in the toolchain/IDE project. The project will not compile!" problem_level="2" source="Peripherals">
+               <feature name="enabled" evaluation="equal">
+                  <data type="Boolean">true</data>
+               </feature>
+            </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.ostimer" description="An unsupported version of the OSTimer Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. The project might not compile correctly." problem_level="1" source="Peripherals">
+               <feature name="version" evaluation="greaterOrEqual">
+                  <data type="Version" maxValue="2.2.9">2.0.1</data>
                </feature>
             </dependency>
             <dependency resourceType="Tool" resourceId="Pins" description="The Pins tool is required by the Peripherals tool, but it is disabled." problem_level="2" source="Peripherals">
@@ -423,6 +437,11 @@
                   <dependency resourceType="SWComponent" resourceId="platform.drivers.lpuart_edma" description="The compatible version of the fsl_uart_edma driver is not available in the project  (required for the eDMA mode)." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="version" evaluation="compatible">
                         <data type="Version">2.5.0</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="OSTIMER_clock" description="OSTIMER_clock is inactive." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
                </dependencies>
@@ -585,6 +604,81 @@
                            <struct name="1"/>
                         </array>
                         <array name="edma_channels"/>
+                     </config_set>
+                  </instance>
+                  <instance name="WAKETIMER0" uuid="9fa5d2e7-f2f0-47b9-aeaa-ab862e3fae30" type="waketimer" type_id="waketimer_747b37796a8a1c323b594e7601fc0e52" mode="general_config" peripheral="WAKETIMER0" enabled="false" comment="" custom_name_enabled="false" editing_lock="false">
+                     <config_set name="fsl_waketimer">
+                        <struct name="clockSettingsWAKETIMER">
+                           <setting name="clockSource0" value="FunctionClock0"/>
+                           <setting name="clockSourceFreq0" value="ClocksTool_DefaultInit"/>
+                           <setting name="clockSource1" value="FunctionClock1"/>
+                        </struct>
+                        <struct name="timerSettingsWAKETIMER">
+                           <setting name="enableTimer" value="true"/>
+                           <setting name="timerValueStr" value="60s"/>
+                           <setting name="enableCallback" value="false"/>
+                           <setting name="waketimer_callback_t" value="WAKETIMER0_Callback"/>
+                           <setting name="interruptEnable" value="true"/>
+                           <struct name="interrupt">
+                              <setting name="IRQn" value="WAKETIMER0_IRQn"/>
+                              <setting name="enable_priority" value="false"/>
+                              <setting name="priority" value="0"/>
+                           </struct>
+                        </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="WUU0" uuid="7216b166-8fc8-4d88-8c44-cb569d482477" type="wuu" type_id="wuu_9e591349506d059ebdfbc993a1b4a700" mode="General" peripheral="WUU0" enabled="false" comment="" custom_name_enabled="false" editing_lock="false">
+                     <config_set name="fsl_wuu">
+                        <array name="wuu_module_config"/>
+                        <array name="wuu_external_pin_config"/>
+                        <struct name="interrupts">
+                           <setting name="enableInterrupt" value="false"/>
+                           <struct name="interrupt">
+                              <setting name="IRQn" value="WUU0_IRQn"/>
+                              <setting name="enable_interrrupt" value="enabled"/>
+                              <setting name="enable_priority" value="false"/>
+                              <setting name="priority" value="0"/>
+                              <setting name="enable_custom_name" value="false"/>
+                           </struct>
+                        </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="UTICK0" uuid="2e98b73b-6099-4642-b2bf-e82306fc6180" type="utick" type_id="utick_58a3a3f691b03a130cd9419552f8327d" mode="general_config" peripheral="UTICK0" enabled="false" comment="" custom_name_enabled="false" editing_lock="false">
+                     <config_set name="fsl_utick" quick_selection="default">
+                        <struct name="clockSettingUTICK">
+                           <setting name="clockSource" value="FunctionClock"/>
+                           <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
+                        </struct>
+                        <struct name="timerSettingUTICK">
+                           <setting name="utick_mode_t" value="kUTICK_Onetime"/>
+                           <setting name="startTimer" value="false"/>
+                           <setting name="timerValueStr" value=""/>
+                           <setting name="callbackEnable" value="false"/>
+                        </struct>
+                        <struct name="interrupt">
+                           <setting name="IRQn" value="UTICK0_IRQn"/>
+                           <setting name="enable_priority" value="false"/>
+                           <setting name="priority" value="0"/>
+                        </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="OSTIMER0" uuid="775de36c-22d6-44e8-bb5e-1ac1465915b6" type="ostimer" type_id="ostimer_aa42dff9cf95fde47e92bd2166c38802" mode="general" peripheral="OSTIMER0" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
+                     <config_set name="fsl_ostimer">
+                        <struct name="clockSettingsOSTIMER">
+                           <setting name="clockSource" value="FunctionClock"/>
+                           <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
+                        </struct>
+                        <setting name="timerEnable" value="false"/>
+                        <struct name="timerSettingsOSTIMER">
+                           <setting name="timerValueStr" value=""/>
+                           <setting name="callbackEnable" value="false"/>
+                           <setting name="ostimer_callback_t" value="OSTIMER_Callback"/>
+                           <struct name="interrupt">
+                              <setting name="IRQn" value="OS_EVENT_IRQn"/>
+                              <setting name="enable_priority" value="false"/>
+                              <setting name="priority" value="0"/>
+                           </struct>
+                        </struct>
                      </config_set>
                   </instance>
                </instances>

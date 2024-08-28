@@ -64,6 +64,16 @@ protected:
     /// @param cmd          Command to be sent to the modem
     /// @param type         Type of command
     /// @param timeout_ms   Timeout to block for, in ms. 0xFFFFFFFF means no timeout
+    /// @param messsage     String to wait for
+    /// @param params_count Number of va_args
+    /// @param              va_args
+    /// @return             True if the message status was returned
+    bool SendCommandBlocking(const SIM7000_CMDSET cmd, const CmdType type, const uint32_t timeout_ms, const char* message, const uint8_t params_count, ...);
+
+    /// @brief              Send a command and block until OK message or timeout
+    /// @param cmd          Command to be sent to the modem
+    /// @param type         Type of command
+    /// @param timeout_ms   Timeout to block for, in ms. 0xFFFFFFFF means no timeout
     /// @param params_count Number of va_args
     /// @param              va_args
     /// @return             True if the OK status was returned
@@ -105,9 +115,13 @@ private:
     /// @return True if the reception restarted properly
     bool ResetReception(void);
 
-    /// @brief              Block until the OK status is not received or timeout
+    /// @brief              Block until the specified message status is not received or timeout
     /// @param timeout_ms   Timeout in ms. 0xFFFFFFFF means no timeout
-    /// @return             True if the OK was received properly
+    /// @param message      String to wait for
+    /// @return             True if the message was received properly
+    bool BlockUntilMessage(uint32_t timeout_ms, const char* message);
+
+    /// @brief              Helper for BlockUntilMessage, waiting for OK
     bool BlockUntilOk(uint32_t timeout_ms);
 
     LPUART_Type* uart_ptr{NULL};

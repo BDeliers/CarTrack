@@ -250,7 +250,7 @@ bool AppModem::EnableAppNetwork(bool enable)
 {
     if (enable)
     {
-        if (SendCommandBlocking(APP_NETWORK_ACTIVE, WRITE, 1e3, 2, "1", this->retained_apn))
+        if (SendCommandBlocking(APP_NETWORK_ACTIVE, WRITE, 10e3, "APP PDP: ACTIVE", 2, "1", this->retained_apn))
         {
             app_network_enabled = true;
             return true;

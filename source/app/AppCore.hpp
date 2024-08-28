@@ -13,3 +13,5 @@ void AppCore_SetInterruptHandler(IRQn_Type vector, void (*handler)(void));
 uint64_t AppCore_GetUptimeMs(void);
 
 void AppCore_BlockingDelayMs(uint32_t delay);
+
+void AppCore_DeepSleepMs(uint32_t delay);

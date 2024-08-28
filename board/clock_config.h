@@ -140,7 +140,7 @@ void BOARD_BootClockFRO64M(void);
 /*******************************************************************************
  * Definitions for BOARD_BootClockFRO96M configuration
  ******************************************************************************/
-#define BOARD_BOOTCLOCKFRO96M_CORE_CLOCK           96000000U  /*!< Core clock frequency: 96000000Hz */
+#define BOARD_BOOTCLOCKFRO96M_CORE_CLOCK           48000000U  /*!< Core clock frequency: 48000000Hz */
 
 
 /*******************************************************************************

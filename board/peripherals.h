@@ -17,6 +17,7 @@
 #include "fsl_gpio.h"
 #include "fsl_port.h"
 #include "fsl_lpuart_edma.h"
+#include "fsl_ostimer.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -31,7 +32,7 @@ extern "C" {
 /* Definition of peripheral ID */
 #define LPUART0_PERIPHERAL LPUART0
 /* Definition of the clock source frequency */
-#define LPUART0_CLOCK_SOURCE 8000000UL
+#define LPUART0_CLOCK_SOURCE 4000000UL
 /* LPUART0 interrupt vector ID (number). */
 #define LPUART0_SERIAL_RX_TX_IRQN LPUART0_IRQn
 /* LPUART0 interrupt handler identifier. */
@@ -40,9 +41,9 @@ extern "C" {
 #define GPIO0_GPIO GPIO0
 /* BOARD_InitPeripherals defines for SysTick */
 /* Definition of clock source frequency. */
-#define SYSTICK_CLK_FREQ 96000000UL
+#define SYSTICK_CLK_FREQ 48000000UL
 /* Definition of clock source frequency. */
-#define SYSTICK_TICKS 96000UL
+#define SYSTICK_TICKS 48000UL
 /* SysTick interrupt vector ID (number). */
 #define SYSTICK_TIMER_REFERENCE_IRQN SysTick_IRQn
 /* SysTick interrupt handler identifier. */
@@ -50,7 +51,7 @@ extern "C" {
 /* Definition of peripheral ID */
 #define LPUART2_PERIPHERAL LPUART2
 /* Definition of the clock source frequency */
-#define LPUART2_CLOCK_SOURCE 8000000UL
+#define LPUART2_CLOCK_SOURCE 4000000UL
 /* LPUART2 eDMA source request. */
 #define LPUART2_RX_DMA_REQUEST kDma0RequestLPUART2Rx
 /* Selected eDMA channel number. */
@@ -63,6 +64,13 @@ extern "C" {
 #define LPUART2_TX_DMA_CHANNEL 1
 /* Used DMA device. */
 #define LPUART2_TX_DMA_BASEADDR DMA0
+/* BOARD_InitPeripherals defines for OSTIMER0 */
+/* Definition of peripheral ID */
+#define OSTIMER0_PERIPHERAL OSTIMER0
+/* Timer clock frequency in Hz (input frequency of the timer) */
+#define OSTIMER0_CLK_FREQ 16384UL
+/* Timer clock period in ns (input period of the timer) */
+#define OSTIMER0_CLK_PERIOD 61035UL
 
 /***********************************************************************************************************************
  * Global variables

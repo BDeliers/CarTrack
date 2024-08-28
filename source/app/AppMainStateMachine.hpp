@@ -1,13 +1,14 @@
 #pragma once
 
 #include "modem/AppModem.hpp"
+#include "AppDebug.hpp"
 
 /// @brief Main state machine class
 class AppMainStateMachine
 {
 
 public:
-	bool Init(void);
+	bool Init(AppDebug& app_debug);
 
 	bool Process(void);
 
@@ -30,18 +31,25 @@ private:
 		APP_HAS_IP,		// An IP has been assigned to the modem
 		ERROR,			// Any failure
 	};
+
 	bool ProcessNetwork(void);
 
 	bool CheckIp(void);
 	bool SendPoint(void);
 
+	uint32_t FlatDistanceBetweenPoints(const GpsInfo& point1, const GpsInfo& point2);
+
 	AppModem app_modem;
+	AppDebug* app_debug;
 
 	NetworkStates 	current_network_state{NetworkStates::ERROR};
 	NetworkStates 	previous_network_state{NetworkStates::ERROR};
 	States			current_main_state{States::ERROR};
 
-	GpsInfo 		last_gps_info;
+	GpsInfo 		current_gps_info;
+	GpsInfo 		previous_gps_info;
 	char 			self_ip[17];
+
+	const uint32_t 	GPS_DISTANCE_THRESHOLD = 30; //	30 meters
 
 };

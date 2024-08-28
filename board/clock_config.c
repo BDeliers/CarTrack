@@ -393,20 +393,26 @@ void BOARD_BootClockFRO64M(void)
 name: BOARD_BootClockFRO96M
 called_from_default_init: true
 outputs:
+- {id: CLK16K_0_clock.outFreq, value: 16.384 kHz}
+- {id: CLK16K_1_clock.outFreq, value: 16.384 kHz}
 - {id: CLK_1M_clock.outFreq, value: 1 MHz}
 - {id: CLK_48M_clock.outFreq, value: 48 MHz}
-- {id: CPU_clock.outFreq, value: 96 MHz}
+- {id: CPU_clock.outFreq, value: 48 MHz}
 - {id: FRO_12M_clock.outFreq, value: 12 MHz}
-- {id: FRO_HF_DIV_clock.outFreq, value: 96 MHz}
-- {id: FRO_HF_clock.outFreq, value: 96 MHz}
-- {id: LPUART0_clock.outFreq, value: 8 MHz}
-- {id: LPUART2_clock.outFreq, value: 8 MHz}
-- {id: MAIN_clock.outFreq, value: 96 MHz}
-- {id: Slow_clock.outFreq, value: 24 MHz}
-- {id: System_clock.outFreq, value: 96 MHz}
+- {id: FRO_HF_DIV_clock.outFreq, value: 48 MHz}
+- {id: FRO_HF_clock.outFreq, value: 48 MHz}
+- {id: LPUART0_clock.outFreq, value: 4 MHz}
+- {id: LPUART2_clock.outFreq, value: 4 MHz}
+- {id: MAIN_clock.outFreq, value: 48 MHz}
+- {id: OSTIMER_clock.outFreq, value: 16.384 kHz}
+- {id: Slow_clock.outFreq, value: 12 MHz}
+- {id: System_clock.outFreq, value: 48 MHz}
 - {id: UTICK_clock.outFreq, value: 1 MHz}
+- {id: WUU_clock.outFreq, value: 16.384 kHz}
 settings:
 - {id: VDD_CORE, value: voltage_1v1}
+- {id: CLK16K0_EN, value: enabled}
+- {id: CLK16K1_EN, value: enabled}
 - {id: CLKOUTDIV_HALT, value: Enable}
 - {id: LPUART0CLKDIV_HALT, value: Enable}
 - {id: LPUART2CLKDIV_HALT, value: Enable}
@@ -417,8 +423,6 @@ settings:
 - {id: MRCC.LPUART2CLKDIV.scale, value: '12', locked: true}
 - {id: MRCC.OSTIMERCLKSEL.sel, value: VBAT.CLK16K_1}
 - {id: SYSCON.AHBCLKDIV.scale, value: '1', locked: true}
-sources:
-- {id: SCG.FIRC.outFreq, value: 96 MHz}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 
@@ -444,23 +448,25 @@ void BOARD_BootClockFRO96M(void)
         ldoOption.CoreLDODriveStrength = kSPC_CoreLDO_NormalDriveStrength;
         (void)SPC_SetActiveModeCoreLDORegulatorConfig(SPC0, &ldoOption);
         /* Configure Flash to support different voltage level and frequency */
-        FMU0->FCTRL = (FMU0->FCTRL & ~((uint32_t)FMU_FCTRL_RWSC_MASK)) | (FMU_FCTRL_RWSC(0x2U));
+        FMU0->FCTRL = (FMU0->FCTRL & ~((uint32_t)FMU_FCTRL_RWSC_MASK)) | (FMU_FCTRL_RWSC(0x1U));
         /* Specifies the operating voltage for the SRAM's read/write timing margin */
         sramOption.operateVoltage = kSPC_sramOperateAt1P1V;
         sramOption.requestVoltageUpdate =  true;
         (void)SPC_SetSRAMOperateVoltage(SPC0, &sramOption);
     }
 
-    CLOCK_SetupFROHFClocking(96000000U);               /*!< Enable FRO HF(96MHz) output */
+    CLOCK_SetupFROHFClocking(48000000U);               /*!< Enable FRO HF(48MHz) output */
 
     CLOCK_SetupFRO12MClocking();                /*!< Setup FRO12M clock */
 
+    CLOCK_SetupFRO16KClocking(0x1U);             /* Enable CLK16K_0 */
+    CLOCK_SetupFRO16KClocking(0x2U);             /* Enable CLK16K_1 */
     CLOCK_AttachClk(kFRO_HF_to_MAIN_CLK);       /* !< Switch MAIN_CLK to FRO_HF */
 
     /* The flow of decreasing voltage and frequency */
     if (coreFreq > BOARD_BOOTCLOCKFRO96M_CORE_CLOCK) {
         /* Configure Flash to support different voltage level and frequency */
-        FMU0->FCTRL = (FMU0->FCTRL & ~((uint32_t)FMU_FCTRL_RWSC_MASK)) | (FMU_FCTRL_RWSC(0x2U));
+        FMU0->FCTRL = (FMU0->FCTRL & ~((uint32_t)FMU_FCTRL_RWSC_MASK)) | (FMU_FCTRL_RWSC(0x1U));
         /* Specifies the operating voltage for the SRAM's read/write timing margin */
         sramOption.operateVoltage = kSPC_sramOperateAt1P1V;
         sramOption.requestVoltageUpdate =  true;
@@ -472,6 +478,7 @@ void BOARD_BootClockFRO96M(void)
     }
 
     /*!< Set up clock selectors - Attach clocks to the peripheries */
+    CLOCK_AttachClk(kCLK_16K_to_OSTIMER);                  /* !< Switch OSTIMER to CLK_16K */
     CLOCK_AttachClk(kFRO_HF_DIV_to_LPUART0);               /* !< Switch LPUART0 to FRO_HF_DIV */
     CLOCK_AttachClk(kFRO_HF_DIV_to_LPUART2);               /* !< Switch LPUART2 to FRO_HF_DIV */
 

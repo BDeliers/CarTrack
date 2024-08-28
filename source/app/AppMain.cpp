@@ -9,7 +9,7 @@ void AppMain::MainLoop(void)
 	app_debug.Flush();
 
 	// Critical failure
-	if (!app_main_state_machine.Init())
+	if (!app_main_state_machine.Init(app_debug))
 	{
 		for (;;)
 		{

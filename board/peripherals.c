@@ -362,6 +362,41 @@ static void LPUART2_init(void) {
 }
 
 /***********************************************************************************************************************
+ * OSTIMER0 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'OSTIMER0'
+- type: 'ostimer'
+- mode: 'general'
+- custom_name_enabled: 'false'
+- type_id: 'ostimer_aa42dff9cf95fde47e92bd2166c38802'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'OSTIMER0'
+- config_sets:
+  - fsl_ostimer:
+    - clockSettingsOSTIMER:
+      - clockSource: 'FunctionClock'
+      - clockSourceFreq: 'ClocksTool_DefaultInit'
+    - timerEnable: 'false'
+    - timerSettingsOSTIMER:
+      - timerValueStr: ''
+      - callbackEnable: 'false'
+      - ostimer_callback_t: 'OSTIMER_Callback'
+      - interrupt:
+        - IRQn: 'OS_EVENT_IRQn'
+        - enable_priority: 'false'
+        - priority: '0'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+
+static void OSTIMER0_init(void) {
+  /* OSTIMER0 peripheral initialization */
+  OSTIMER_Init(OSTIMER0_PERIPHERAL);
+}
+
+/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 void BOARD_InitPeripherals(void)
@@ -375,6 +410,7 @@ void BOARD_InitPeripherals(void)
   GPIO0_init();
   SysTick_init();
   LPUART2_init();
+  OSTIMER0_init();
 }
 
 /***********************************************************************************************************************
